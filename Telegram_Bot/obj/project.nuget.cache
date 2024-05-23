@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "xqmOId+EGKV3qjJ3U/ZeeGveFXsLljdh/h/vWodj9Yrzko4su4ag9bVO/gKWltfsBRFgVrumILWxESRzLj49hg==",
+  "dgSpecHash": "iZMPE8F90hr7K3BgKrsMKw3iIDqCebM/0ik6V5gnScExRX7NwvXbbpQNVDwIQsSZ6gq+63yEpnttr0V2OGGxjg==",
   "success": true,
-  "projectFilePath": "C:\\Users\\maxim\\source\\repos\\TG-Bot-C-\\Telegram_Bot\\Telegram_Bot.csproj",
+  "projectFilePath": "C:\\Users\\maxim\\source\\repos\\TG_Bot_C\\Telegram_Bot\\Telegram_Bot.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\maxim\\.nuget\\packages\\newtonsoft.json\\13.0.1\\newtonsoft.json.13.0.1.nupkg.sha512",
     "C:\\Users\\maxim\\.nuget\\packages\\telegram.bot\\19.0.0\\telegram.bot.19.0.0.nupkg.sha512"
