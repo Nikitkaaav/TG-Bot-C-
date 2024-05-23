@@ -11,6 +11,7 @@ namespace Telegram_Bot
     public class Host
     {
         public Action<ITelegramBotClient, Update>? OnMessage;
+        public Action<ITelegramBotClient, Update>? Update;
         private TelegramBotClient client;
 
         public Host(string token)
@@ -21,7 +22,7 @@ namespace Telegram_Bot
         public void Start()
         {
             client.StartReceiving(UpdateHandler, ErrorHadler);
-            Console.WriteLine("Бот хуйня");
+            Console.WriteLine("Для начала работы с ботом введите /start");
         }
 
         private async Task ErrorHadler(ITelegramBotClient client, Exception exception, CancellationToken token)
@@ -36,5 +37,7 @@ namespace Telegram_Bot
             OnMessage?.Invoke(client, update);
             await Task.CompletedTask;
         }
+       
+
     }
 }

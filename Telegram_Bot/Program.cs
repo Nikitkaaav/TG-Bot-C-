@@ -11,12 +11,50 @@ namespace Telegram_Bot
             Host bot = new Host("7038593299:AAEkEuD54turzP9lr_xHzqqWSx8-yhAeLac");
             bot.Start();
             bot.OnMessage += OnMessage;
+            
             Console.ReadLine();
+
         }
 
         private static async void OnMessage(ITelegramBotClient client, Update update)
         {
-            await client.SendTextMessageAsync(update.Message?.Chat.Id ?? 0, update.Message?.Text ?? "[не текст]");
+
+            var message = update.Message;
+            if (message.Text != null)
+            {
+                if (message.Text.ToLower().Contains("/start"))
+                {
+                    await client.SendTextMessageAsync(message.Chat.Id, "Чем дальше лес...... скибидидоб ес ес");
+                    return;
+
+                }
+
+            }
         }
+
+
+        private static async Task Update(ITelegramBotClient client, Update update, CancellationToken token)
+        {
+            var message = update.Message;
+            if (message.Text != null)
+            {
+                if (message.Text.ToLower().Contains("/start"))
+                {
+                    await client.SendTextMessageAsync(message.Chat.Id, "Чем дальше лес...... скибидидоб ес ес");
+                    return;
+
+                }
+
+            }
+
+
+        }
+
+
+
+
+
+
+
     }
 }
