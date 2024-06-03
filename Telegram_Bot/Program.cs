@@ -36,22 +36,35 @@ class Program
             }
         }
     }
-
+    
     private static async Task BotOnMessageReceived(Message message)
     {
+        string selectedDistrict = "";
+        string selectedRestaurantType = "";
+        string selectedKitchen = "";
+        string selectedPriceRange = "";
+
+
+        List<string> districts = new List<string> { "Мотовилихинский", "Свердловский", "Индустриальный", "Ленинский", "Орджоникидзевский", "Дзержинский", "Кировский" };
+        List<string> restaurants = new List<string> {"Ресторан", "Кафе","Бар/Паб" };
+        List<string> prices = new List<string> { "До 500 руб.", "500-1000 руб.", "1000-1500 руб.","От 1500 руб." };
+        List<string> kitchens = new List<string> { "Шашлычная", "Восточная", "Европейская" , "Фастфуд", "Веганская", "Грузинская", "Азиатская" , "Американская", "Итальянская", "Японская" };
+
         var chatId = message.Chat.Id;
 
         if (message.Text == "/start")
         {
             var replyMarkup = new ReplyKeyboardMarkup(new[]
             {
-            new[] { new KeyboardButton("До 500 руб."), new KeyboardButton("500-1000 руб.") },
-            new[] { new KeyboardButton("1000-1500 руб."), new KeyboardButton("От 1500 руб.") }
+            new[] { new KeyboardButton("Ресторан"), new KeyboardButton("Кафе") },
+            new[] { new KeyboardButton("Бар/Паб")}
         }, resizeKeyboard: true);
 
-            await botClient.SendTextMessageAsync(chatId, "Выберите ценовую категорию заведения:", replyMarkup: replyMarkup);
+            await botClient.SendTextMessageAsync(chatId, "В какое заведение вы хотели бы пойти:", replyMarkup: replyMarkup);
         }
-        else if (message.Text == "До 500 руб." || message.Text == "500-1000 руб." || message.Text == "1000-1500 руб." || message.Text == "От 1500 руб.")
+
+        
+        else if (restaurants.Contains(message.Text))
         {
             var replyMarkup = new ReplyKeyboardMarkup(new[]
             {
@@ -61,27 +74,44 @@ class Program
             new[] { new KeyboardButton("Кировский") }
         }, resizeKeyboard: true);
 
-            await botClient.SendTextMessageAsync(chatId, $"Вы выбрали ценовую категорию: {message.Text}. Теперь выберите район:", replyMarkup: replyMarkup);
+            await botClient.SendTextMessageAsync(chatId, $"Вы выбрали тип заведения : {message.Text}. Теперь выберите район:", replyMarkup: replyMarkup);
         }
-        else if (message.Text == "Мотовилихинский" || message.Text == "Свердловский" || message.Text == "Индустриальный" || message.Text == "Ленинский" || message.Text == "Орджоникидзевский" || message.Text == "Дзержинский" || message.Text == "Кировский")
+        else if (districts.Contains(message.Text))
+        {
+
+            selectedDistrict = message.Text;
+            var replyMarkup = new ReplyKeyboardMarkup(new[]
+            {
+             new[] { new KeyboardButton("Шашлычная"), new KeyboardButton("Восточная") },
+            new[] { new KeyboardButton("Европейская"), new KeyboardButton("Фастфуд") },
+            new[] { new KeyboardButton("Веганская"), new KeyboardButton("Грузинская")},
+            new[] { new KeyboardButton("Азиатская"), new KeyboardButton("Американская")},
+            new[] { new KeyboardButton("Итальянская"), new KeyboardButton("Японская")}
+        }, resizeKeyboard: true);
+
+            await botClient.SendTextMessageAsync(chatId, $"Вы выбрали район: {message.Text}. Теперь выберите тип кухни:", replyMarkup: replyMarkup);
+        }
+        else if (kitchens.Contains(message.Text))
         {
             var replyMarkup = new ReplyKeyboardMarkup(new[]
             {
-            new[] { new KeyboardButton("Ресторан"), new KeyboardButton("Кафе") },
-            new[] { new KeyboardButton("Бар") , new KeyboardButton("Кафе") }
+            new[] { new KeyboardButton("До 500 руб."), new KeyboardButton("500-1000 руб.") },
+            new[] { new KeyboardButton("1000-1500 руб."), new KeyboardButton("От 1500 руб.") }
         }, resizeKeyboard: true);
 
-            await botClient.SendTextMessageAsync(chatId, $"Вы выбрали район: {message.Text}. Теперь выберите тип заведения:", replyMarkup: replyMarkup);
+            await botClient.SendTextMessageAsync(chatId, $"Вы выбрали тип кухни: {message.Text}. Теперь выберите ценовую категорию:", replyMarkup: replyMarkup);
         }
-        else
+
+        else if (message.Text == "Кировский")
         {
             var replyMarkup = new ReplyKeyboardMarkup(new[]
             {
-            new[] { new KeyboardButton("Итальянская"), new KeyboardButton("Японская") },
-            new[] { new KeyboardButton("Французская"), new KeyboardButton("Русская") }
+            new[] { new KeyboardButton("1"), new KeyboardButton("2") },
+            new[] { new KeyboardButton("3"), new KeyboardButton("4") }
         }, resizeKeyboard: true);
 
-            await botClient.SendTextMessageAsync(chatId, $"Вы выбрали тип заведения: {message.Text}. Теперь выберите тип кухни:", replyMarkup: replyMarkup);
+            await botClient.SendTextMessageAsync(chatId, $"Вы выбрали тип кухни: {message.Text}. Теперь выберите ценовую категорию:", replyMarkup: replyMarkup);
         }
+
     }
 }

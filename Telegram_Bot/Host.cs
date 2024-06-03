@@ -19,11 +19,11 @@ namespace Telegram_Bot
             client = new TelegramBotClient(token);
         }
         
-        public void Start()
+       /* public void Start()
         {
             client.StartReceiving(UpdateHandler, ErrorHadler);
             Console.WriteLine("Для начала работы с ботом введите /start");
-        }
+        }*/
 
         private async Task ErrorHadler(ITelegramBotClient client, Exception exception, CancellationToken token)
         {
@@ -37,7 +37,7 @@ namespace Telegram_Bot
             OnMessage?.Invoke(client, update);
             await Task.CompletedTask;
         }
-       
 
+        
     }
 }
