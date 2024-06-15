@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "nUHkHADCpbPXZ38NuOCWYV6t3/gSD5K9q8abHkTw69Q/5aEXL2D0MF/gpUaqVaTGm/ZJH0sQ8L/etjzVhcaCVQ==",
+  "dgSpecHash": "bM8zq5ge/klwv92Ce1Z+5VMLt5/ZXNee84f0WOIEVYPG5F0E+71fmLNMQVuPCveoCTj3STdEV9inR7wUQ8yTZQ==",
   "success": true,
-  "projectFilePath": "C:\\Users\\maxim\\Source\\Repos\\TG-Bot-C-\\Telegram_Bot\\Telegram_Bot.csproj",
+  "projectFilePath": "C:\\Users\\maxim\\Source\\Repos\\TG2\\Telegram_Bot\\Telegram_Bot.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\maxim\\.nuget\\packages\\microsoft.netcore.platforms\\1.1.0\\microsoft.netcore.platforms.1.1.0.nupkg.sha512",
     "C:\\Users\\maxim\\.nuget\\packages\\microsoft.netcore.targets\\1.1.0\\microsoft.netcore.targets.1.1.0.nupkg.sha512",
