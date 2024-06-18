@@ -43,8 +43,10 @@ partial class SendingMessages
         var request = service.Spreadsheets.Values.Get(spreadsheetId, range);// запрос для получения данных из таблицы по данному id
         var chatId = message.Chat.Id; // получение идентификатора telegram чата 
         string savedFile = "saved_data.txt";
+               
         // Типы заведений
-        if (message.Text == "Бар/Паб")
+        
+        if (message.Text == "Бар/Паб") // ПроВерка на Бар/Паб
         {
             try
             {
@@ -53,8 +55,6 @@ partial class SendingMessages
 
                 if (values != null && values.Count > 0)
                 {
-
-
                     System.IO.File.WriteAllText(savedFile, string.Empty); // очистить файл перед записью
 
                     foreach (var line in values)
@@ -87,8 +87,6 @@ partial class SendingMessages
                             System.IO.File.AppendAllText(savedFile, answerTextFinal + "\r\n\r\n");
 
                         }
-
-
                     }
                 }
 
@@ -103,7 +101,7 @@ partial class SendingMessages
                 await botClient.SendTextMessageAsync(chatId, $"Ошибка: {ex.Message}");
             }
         }
-        if (message.Text == "Кафе")
+        if (message.Text == "Кафе") // ПроВерка на Кафе
         {
             try
             {
@@ -112,8 +110,6 @@ partial class SendingMessages
 
                 if (values != null && values.Count > 0)
                 {
-
-
                     System.IO.File.WriteAllText(savedFile, string.Empty); // Очистить файл перед записью
 
                     foreach (var line in values)
@@ -156,7 +152,7 @@ partial class SendingMessages
                 await botClient.SendTextMessageAsync(chatId, $"Ошибка: {ex.Message}");
             }
         }
-        if (message.Text == "Ресторан")
+        if (message.Text == "Ресторан") // ПроВерка на Ресторан
         {
             try
             {
@@ -165,8 +161,6 @@ partial class SendingMessages
 
                 if (values != null && values.Count > 0)
                 {
-
-
                     System.IO.File.WriteAllText(savedFile, string.Empty); // Очистить файл перед записью
 
                     foreach (var line in values)
@@ -209,7 +203,9 @@ partial class SendingMessages
                 await botClient.SendTextMessageAsync(chatId, $"Ошибка: {ex.Message}");
             }
         }
+        
         //Кухни
+        
         else if (message.Text == "Быстрое питание") // ПроВерка на Быстрое питание
         {
             try
@@ -230,11 +226,7 @@ partial class SendingMessages
 
                             filteredRecords.Add(record);
                         }
-
-
-
                     }
-
                     string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords);
                     System.IO.File.WriteAllText(savedFile, filteredRecordsFinal);
                 }
@@ -268,7 +260,6 @@ partial class SendingMessages
                             filteredRecords.Add(record);
                         }
                     }
-
                     string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords);
                     System.IO.File.WriteAllText(savedFile, filteredRecordsFinal);
                 }
@@ -301,11 +292,7 @@ partial class SendingMessages
                             adding = true;
                             filteredRecords.Add(record);
                         }
-
-
-
                     }
-
                     string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords);
                     System.IO.File.WriteAllText(savedFile, filteredRecordsFinal);
                 }
@@ -338,11 +325,7 @@ partial class SendingMessages
                             adding = true;
                             filteredRecords.Add(record);
                         }
-
-
-
                     }
-
                     string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords);
                     System.IO.File.WriteAllText(savedFile, filteredRecordsFinal);
                 }
@@ -356,7 +339,7 @@ partial class SendingMessages
                 await botClient.SendTextMessageAsync(chatId, $"Ошибка: {ex.Message}");// Обработка исключения
             }
         }
-        else if (message.Text == "Русская") // ПроВерка на Европейская
+        else if (message.Text == "Русская") // ПроВерка на Русская
         {
             try
             {
@@ -375,11 +358,7 @@ partial class SendingMessages
                             adding = true;
                             filteredRecords.Add(record);
                         }
-
-
-
                     }
-
                     string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords);
                     System.IO.File.WriteAllText(savedFile, filteredRecordsFinal);
                 }
@@ -412,11 +391,7 @@ partial class SendingMessages
                             adding = true;
                             filteredRecords.Add(record);
                         }
-
-
-
                     }
-
                     string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords);
                     System.IO.File.WriteAllText(savedFile, filteredRecordsFinal);
                 }
@@ -449,11 +424,7 @@ partial class SendingMessages
                             adding = true;
                             filteredRecords.Add(record);
                         }
-
-
-
                     }
-
                     string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords);
                     System.IO.File.WriteAllText(savedFile, filteredRecordsFinal);
                 }
@@ -467,7 +438,9 @@ partial class SendingMessages
                 await botClient.SendTextMessageAsync(chatId, $"Ошибка: {ex.Message}");// Обработка исключения
             }
         }
+        
         //Районы
+        
         else if (message.Text == "Свердловский")     // ПроВерка на Свердловский 
         {
             try
@@ -489,8 +462,6 @@ partial class SendingMessages
                             filteredRecords.Add(record);
                         }
                     }
-
-
                     string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords);
                     System.IO.File.WriteAllText(savedFile, filteredRecordsFinal);
                 }
@@ -519,11 +490,7 @@ partial class SendingMessages
                             adding = true;
                             filteredRecords.Add(record);
                         }
-
-
-
                     }
-
                     string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords);
                     System.IO.File.WriteAllText(savedFile, filteredRecordsFinal);
                 }
@@ -537,7 +504,7 @@ partial class SendingMessages
                 await botClient.SendTextMessageAsync(chatId, $"Ошибка: {ex.Message}");// Обработка исключения
             }
         }
-        else if (message.Text == "Мотовилихинский") // ПроВерка на Мотовилиха
+        else if (message.Text == "Мотовилихинский") // ПроВерка на Мотовилихинский
         {
             try
             {
@@ -558,13 +525,8 @@ partial class SendingMessages
                             filteredRecords.Add(record);
                         }
                     }
-
                     string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords);
                     System.IO.File.WriteAllText(savedFile, filteredRecordsFinal);
-
-
-
-
                 }
                 else
                 {
@@ -595,11 +557,7 @@ partial class SendingMessages
                             adding = true;
                             filteredRecords.Add(record);
                         }
-
-
-
                     }
-
                     string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords);
                     System.IO.File.WriteAllText(savedFile, filteredRecordsFinal);
                 }
@@ -632,11 +590,7 @@ partial class SendingMessages
                             adding = true;
                             filteredRecords.Add(record);
                         }
-
-
-
                     }
-
                     string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords);
                     System.IO.File.WriteAllText(savedFile, filteredRecordsFinal);
                 }
@@ -669,11 +623,7 @@ partial class SendingMessages
                             adding = true;
                             filteredRecords.Add(record);
                         }
-
-
-
                     }
-
                     string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords);
                     System.IO.File.WriteAllText(savedFile, filteredRecordsFinal);
                 }
@@ -706,11 +656,7 @@ partial class SendingMessages
                             adding = true;
                             filteredRecords.Add(record);
                         }
-
-
-
                     }
-
                     string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords);
                     System.IO.File.WriteAllText(savedFile, filteredRecordsFinal);
                 }
@@ -724,7 +670,9 @@ partial class SendingMessages
                 await botClient.SendTextMessageAsync(chatId, $"Ошибка: {ex.Message}");// Обработка исключения
             }
         }
+        
         // Цены
+        
         else if (message.Text == "До 500 руб.") // ПроВерка на до 500р
         {
             try
@@ -745,9 +693,6 @@ partial class SendingMessages
                             adding = true;
                             filteredRecords.Add(record);
                         }
-
-
-
                     }
 
                     if (!existence)
@@ -794,7 +739,6 @@ partial class SendingMessages
                             filteredRecords.Add(record);
                         }
                     }
-
 
                     if (!existence)
                     {
@@ -852,7 +796,6 @@ partial class SendingMessages
                         // это вывод, того, что нашел бот в таблице
                         await botClient.SendTextMessageAsync(chatId, filteredRecordsFinal);
                     }
-
                 }
                 else
                 {
@@ -884,8 +827,6 @@ partial class SendingMessages
                             existence = true;
                             filteredRecords.Add(record);
                         }
-
-
                     }
 
                     if (!existence)
@@ -900,8 +841,6 @@ partial class SendingMessages
                         // это вывод, того, что нашел бот в таблице
                         await botClient.SendTextMessageAsync(chatId, filteredRecordsFinal);
                     }
-
-
                 }
                 else
                 {
@@ -914,21 +853,30 @@ partial class SendingMessages
             }
         }
 
+        if (message.Text == "✔Поддержка✔") // ПроВерка на Поддержка
+        {
+            InlineKeyboardMarkup inlineKeyboard = new(new[]
+            {
+             new[] { InlineKeyboardButton.WithUrl("Обратная связь", "https://forms.gle/RN9s4z8i1ohjYxHeA") },
+            });
+            await botClient.SendTextMessageAsync(chatId, "Нажмите, чтобы заполнить форму:", replyMarkup: inlineKeyboard);
+        }
+
         List<string> districts = new List<string> { "Мотовилихинский", "Свердловский", "Индустриальный", "Ленинский", "Орджоникидзевский", "Дзержинский", "Кировский" };
         List<string> restaurants = new List<string> { "Ресторан", "Кафе", "Бар/Паб" };
         List<string> prices = new List<string> { "До 500 руб.", "500-1000 руб.", "1000-1500 руб.", "От 1500 руб." };
         List<string> kitchens = new List<string> { "Восточная", "Европейская", "Быстрое питание", "Грузинская", "Азиатская", "Итальянская", "Русская" };
 
-        if (message.Text == "/start" || message.Text == "Начать заново")
+        if (message.Text == "/start" || message.Text == "⟲Начать заново⟲")
         {
 
             var replyMarkup = new ReplyKeyboardMarkup(new[]
            {
              new[] { new KeyboardButton("Ресторан"), new KeyboardButton("Кафе") },
              new[] { new KeyboardButton("Бар/Паб")},
-             new[] { new KeyboardButton("Начать заново")},
-         }, resizeKeyboard: true);
-            await botClient.SendTextMessageAsync(chatId, "Привет,уважаемый пользователь я бот,который поможет тебе найти заведение по твоим интересам в городе Перми.Тебе будут придложены кнопки, благодаря которым ты сможешь выбрать завидение", replyMarkup: replyMarkup);
+             new[] { new KeyboardButton("✔Поддержка✔") },
+             new[] { new KeyboardButton("⟲Начать заново⟲") },
+         }, resizeKeyboard: true);           
             await botClient.SendTextMessageAsync(chatId, "В какое заведение вы хотели бы пойти:", replyMarkup: replyMarkup);
         }
         else if (message.Text == "Ресторан")
@@ -938,8 +886,8 @@ partial class SendingMessages
              new[] { new KeyboardButton("Европейская"), new KeyboardButton("Быстрое питание") },
              new[] { new KeyboardButton("Азиатская"),new KeyboardButton("Итальянская")},
              new[] { new KeyboardButton("Грузинская") },
-             new[] { new KeyboardButton("Начать заново")},
-
+             new[] { new KeyboardButton("✔Поддержка✔") },
+             new[] { new KeyboardButton("⟲Начать заново⟲") },
          }, resizeKeyboard: true);
 
             await botClient.SendTextMessageAsync(chatId, $"Вы выбрали тип кухни: {message.Text}. Теперь выберите тип кухни:", replyMarkup: replyMarkup);
@@ -953,11 +901,11 @@ partial class SendingMessages
              new[] { new KeyboardButton("Индустриальный"), new KeyboardButton("Ленинский") },
              new[] { new KeyboardButton("Орджоникидзевский"), new KeyboardButton("Дзержинский") },
              new[] { new KeyboardButton("Кировский") },
-             new[] { new KeyboardButton("Начать заново")},
+             new[] { new KeyboardButton("✔Поддержка✔") },
+             new[] { new KeyboardButton("⟲Начать заново⟲") },
          }, resizeKeyboard: true);
 
             await botClient.SendTextMessageAsync(chatId, $"Вы выбрали тип заведения : {message.Text}. Теперь выберите район:", replyMarkup: replyMarkup);
-
         }
 
         else if (message.Text == "Кафе")
@@ -968,7 +916,8 @@ partial class SendingMessages
              new[] { new KeyboardButton("Индустриальный"), new KeyboardButton("Ленинский") },
              new[] { new KeyboardButton("Орджоникидзевский"), new KeyboardButton("Дзержинский") },
              new[] { new KeyboardButton("Кировский") },
-             new[] { new KeyboardButton("Начать заново")},
+             new[] { new KeyboardButton("✔Поддержка✔") },
+             new[] { new KeyboardButton("⟲Начать заново⟲") },
          }, resizeKeyboard: true);
 
             await botClient.SendTextMessageAsync(chatId, $"Вы выбрали тип заведения : {message.Text}. Теперь выберите район:", replyMarkup: replyMarkup);
@@ -982,7 +931,8 @@ partial class SendingMessages
              new[] { new KeyboardButton("Индустриальный"), new KeyboardButton("Ленинский") },
              new[] { new KeyboardButton("Орджоникидзевский"), new KeyboardButton("Дзержинский") },
              new[] { new KeyboardButton("Кировский") },
-             new[] { new KeyboardButton("Начать заново")},
+             new[] { new KeyboardButton("✔Поддержка✔") },
+             new[] { new KeyboardButton("⟲Начать заново⟲") },
          }, resizeKeyboard: true);
 
             await botClient.SendTextMessageAsync(chatId, $"Вы выбрали тип заведения : {message.Text}. Теперь выберите район:", replyMarkup: replyMarkup);
@@ -993,7 +943,8 @@ partial class SendingMessages
             {
               new[] { new KeyboardButton("До 500 руб."), new KeyboardButton("500-1000 руб.") },
              new[] { new KeyboardButton("1000-1500 руб."), new KeyboardButton("От 1500 руб.") },
-             new[] { new KeyboardButton("Начать заново")},
+             new[] { new KeyboardButton("✔Поддержка✔") },
+             new[] { new KeyboardButton("⟲Начать заново⟲") },
          }, resizeKeyboard: true);
 
             await botClient.SendTextMessageAsync(chatId, $"Вы выбрали район: {message.Text}. Теперь выберите ценовую категорию:", replyMarkup: replyMarkup);
