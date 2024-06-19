@@ -6,13 +6,13 @@ public class TelegramBotClientService
 {
     private TelegramBotClient botClient;
 
-    public TelegramBotClientService(string apiKey)
+    public TelegramBotClientService(string apiKey) // создаем конструктор 
     {
         botClient = new TelegramBotClient(apiKey);
     }
 
-    public async Task SendTextMessageAsync(ChatId chatId, string text, IReplyMarkup replyMarkup = null)
+    public async Task SendTextMessageAsync(ChatId chatId, string text, IReplyMarkup replyMarkup = null) // создаем метод 
     {
-        await botClient.SendTextMessageAsync(chatId, text, replyMarkup: replyMarkup);
+        await botClient.SendTextMessageAsync(chatId, text, replyMarkup: replyMarkup); // выполнение метода 
     }
 }
