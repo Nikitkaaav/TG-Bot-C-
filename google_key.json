@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "starlit-hulling-426015-n1",
+  "private_key_id": "defbb192b64ee15fef1aeb3f847cdcfff34ebd85",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCPaMn7Lg/wnc9p\nhrKmr8vrDzuzxSBoEN/GBv8JpQpUwlHsdfDGEJo1GJX7Gt+vw+iNbmeDyRCs+c93\nepMcUoGreRnBLxK1SPjOBF7IDuK3gpswaCRZ9MMMxzT2bply7G3rfIIEbNuex1F9\nNytVKdeFaOELUEzRsTJSARgEfUfYUdeJ7g8imV3g/Q+0YmNHe6qZjB0olK4qC7gi\n804DORTT0daGU+NAbWzjC21ml1vtccHwcLHWl3DshskmXpvaJSNIfvxLPXr0ol6B\nEhFUVKG6Dyvs58lRGaLhwQ8dmyzwlrf3FdB2otkCG66Vi/tDkYdXMx7QZvcC2ALw\nACZc72+9AgMBAAECggEADjCneb3tUFkBJrcwErvG4O+tL+TTx9BRoBndnwHwY4Il\n0pC5/hMy+wl/f60BULZBGst/nSPmTUNbsr4Tc+Q7FfFB6eJjRsJdch8vFLsaVl+r\nRO8tF6SXLzq/5Bl+AAfieYBkqhTuZ0fgKZRtqnvdKkN+Lx0nOMGAkeovSvRtiTsr\n8fRa2AUpk5xQUgNKuT3XuVByhHOo/1terw8HaAWcRdw37VzoHwqraH6S2hICRAqC\nDzhWUaMYgWlMjSqE8IZcYM5NfvKzaVWJ6KKIHiX9cVb7L25QUVsa7C2vHDDry6EP\nQGc75cEFuYVwVcNp2mfP4OMKIRv/ZcA3CdAivCF2SQKBgQDJfqcGf8BDSoSAmFfh\nS6G+iezFVzx5QrRv/eJHurh8MscYP8vrvdY7TnUkuPcspeWpL4/TPY+IaxQs3mnc\nzW4Oy3OAwgT+2uqgH1mNTGJxxuz7qY/MpZ4JOONkeLjD3/OFth71QFy7d+881aTS\nmolRGdYsTtPMw0YmUCkA+GuoGQKBgQC2M8TvQdemNT4qQIYAwPVeufCxSXoFWki+\nIpxKr3VS3TSjEo5X0R578G56KEHj0RhJSBybXnrKjVF9lDuuxf/jxt65I+UBfh7F\nCWIH6FIN3iyUdbJrZZTf2Uzc0JCTGzQQDt5FFJ9p6qZG2YEG0NGQbW4KUJ46bx2c\nE/c4LFxJRQKBgCGZLOC4jKar1kxbGsxGgEH1XbXKRhsyNEQ4YXL0f662CNzSRn6Y\nuRBKlN36ubyILTN46tKegUCOGl8g9yYKWz+8TRY7Q/n7JwRsNdKJ2iB+uyV7sK6/\nLwr6oXAvcR+4SDMTmzXp9YyNAydxuHolqqALXtskicyrAxeAZlXzFoCBAoGAQBoM\nkiR3C0m2GkVjH8bDTNVcIfN404NFDme81uXOAB5FE45GuAyhjfcz1xRswgrhYX7W\nWa8uwi5f2i+Zo86TTX69AyPmwNSvXKEFdUS+AZUF2CFkaTZu3yZjTVivVKIAehnR\nBzrPLwNYBpslMtGquQZW7ZgZYvOO1keL9Z5dxYUCgYAnemAFKDjPyrNoz3j4/m/b\ny3lEqrbthawlXMZj+Sfq+eJ27+F7ZkjkA3NM8GsvhR5XdruJKt0CD9Jd6o67LtXl\nXqb4QXurDHocNyRnl3/G8SZls28tmaqILlbOiU9CVMevR2mN6FICdTHckDhfjMQi\nTLQpyP5mT9kf2It1LyA6ew==\n-----END PRIVATE KEY-----\n",
+  "client_email": "ahman-118@starlit-hulling-426015-n1.iam.gserviceaccount.com",
+  "client_id": "110915589243838676274",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/ahman-118%40starlit-hulling-426015-n1.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

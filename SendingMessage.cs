@@ -10,20 +10,22 @@ using Telegram.Bot.Args;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
-partial class SendingMessages
+using System.Net;
+using static System.Net.Mime.MediaTypeNames;
+partial class SendingMessages // класс, отвечающий за обработку и отправку сообщений, а так же за создание кнопок
 {
-    private static TelegramBotClient botClient;
-    private static string[] Scopes = { SheetsService.Scope.SpreadsheetsReadonly };
-    private static SheetsService service;
+    
+    private static string[] Scopes = { SheetsService.Scope.SpreadsheetsReadonly }; // обьявляем массив строк,который будет содержать область доступа к гугл таблице(Google Sheets)
+    private static SheetsService service; // поле, которое создает сервис для работы с гугл таблицей(Google Sheets API)
 
-    public static async Task MessageProcessing(Message message, TelegramBotClient botClient)
+    public static async Task MessageProcessing(Message message, TelegramBotClient botClient)// метод, который обрабатывает запросы, отправляемые пользователем из Телеграм бота,а так же создает кнопки в Телеграм бота
     {
-        var GoogleFileJson = "google_key.json";
+        var GoogleFileJson = "google_key.json"; // файл JSON для работы с гугл таблицей
 
         GoogleCredential credential;
 
 
-        using (var stream = new FileStream(GoogleFileJson, FileMode.Open, FileAccess.Read))
+        using (var stream = new FileStream(GoogleFileJson, FileMode.Open, FileAccess.Read)) // чтение JSON файла
         {
             credential = GoogleCredential.FromStream(stream);
 
@@ -33,39 +35,39 @@ partial class SendingMessages
             }
         }
 
-        service = new SheetsService(new BaseClientService.Initializer()
+        service = new SheetsService(new BaseClientService.Initializer()// созданием инициализатор http ддя работы с API гугл таблицы
         {
             HttpClientInitializer = credential
         });
-        string range = "Лист2!A1:Z300";
+        string range = "Лист2!A1:Z300"; // задаем диапазон в гугл таблице из которого будет браться информация
         string spreadsheetId = "1Bm6xziI9e4HptwMd3xU0PuixlWTC323RQDSQP9qsD-g";
 
-        var request = service.Spreadsheets.Values.Get(spreadsheetId, range);// запрос для получения данных из таблицы по данному id
-        var chatId = message.Chat.Id; // получение идентификатора telegram чата 
-        string savedFile = "saved_data.txt";
-               
+        var request = service.Spreadsheets.Values.Get(spreadsheetId, range);// создаем запрос для получения данных из таблицы по данному id
+        var chatId = message.Chat.Id; // получением идентификатор телеграм чата 
+        string savedFile = "data.txt"; // задаем имя файла в который будет записываться информация из таблицы      
+
         // Типы заведений
-        
-        if (message.Text == "Бар/Паб") // ПроВерка на Бар/Паб
+        if (message.Text == "Кафе") // ПроВерка на Кафе, если введенное сообщение - Кафе
         {
-            try
-            {
-                var answer = request.Execute();
-                var values = answer.Values;
+           try { 
+                var answer = request.Execute(); // делаем запрос к гугл таблице
+                var values = answer.Values;// получаем значения из гугл таблицы
 
                 if (values != null && values.Count > 0)
                 {
-                    System.IO.File.WriteAllText(savedFile, string.Empty); // очистить файл перед записью
+                    System.IO.File.WriteAllText(savedFile, string.Empty); // очищаем файл перед записью
 
-                    foreach (var line in values)
+                    foreach (var line in values) // перебираем все значения, полученные из гугл таблицы
                     {
-                        if (line.Contains("Тип заведения: Бар/Паб."))
+                        if (line.Contains("Тип заведения: Кафе.")) // проверяем содержит ли данную информацию
                         {
-                            bool NewLine = true;
-                            string answerText = string.Join("\t", line);
-                            string[] sentences = answerText.Split('.'); // Разбиваем текст на строки после каждой точки
-                            string answerTextFinal = string.Join(".\r\n", sentences);
-                            foreach (var value in line) // поиск по точкам 
+                          
+                            bool NewLine = true; // создаем переменную для отступов 
+                            string answerText = string.Join("\t", line); // создаем строки с разделением
+                            string[] sentences = answerText.Split('.'); // разбиваем  на строки после каждой точки
+                            string answerTextFinal = string.Join(".\r\n", sentences); // все обьеденяем разделяя точкой 
+
+                            foreach (var value in line) // поиск по точкам, для того чтобы при выводе сообщений это не выглядело как сплощной текст 
                             {
                                 if (NewLine && value == ".")
                                 {
@@ -84,43 +86,100 @@ partial class SendingMessages
                                 }
                             }
 
-                            System.IO.File.AppendAllText(savedFile, answerTextFinal + "\r\n\r\n");
-
+                            System.IO.File.AppendAllText(savedFile, answerTextFinal + "\r\n\r\n"); // записываем все в файл 
                         }
                     }
                 }
 
                 else
                 {
-                    await botClient.SendTextMessageAsync(chatId, "Данного заведения не найдено.");
+                    await botClient.SendTextMessageAsync(chatId, "Данного заведения не найдено."); // добавляем исколючение если нет такого заведения 
+                }
+        }
+
+            catch (Exception ex) // обрабатываем исключения 
+            {
+                await botClient.SendTextMessageAsync(chatId, $"Ошибка: {ex.Message}");
+            }
+    }
+        if (message.Text == "Бар/Паб") // ПроВерка на Бар/Паб, работает так же как и проверка на Кафе
+        {
+            try
+            {
+                var answer = request.Execute(); // делаем запрос к гугл таблице
+                var values = answer.Values;// получаем значения из гугл таблицы
+
+                if (values != null && values.Count > 0)
+                {
+                    System.IO.File.WriteAllText(savedFile, string.Empty); // очищаем файл перед записью
+
+                    foreach (var line in values) // перебираем все значения, полученные из гугл таблицы
+                    {
+                        if (line.Contains("Тип заведения: Бар/Паб.")) // проверяем содержит ли данную информацию
+                        {
+
+                            bool NewLine = true; // создаем переменную для отступов 
+                            string answerText = string.Join("\t", line); // создаем строки с разделением
+                            string[] sentences = answerText.Split('.'); // разбиваем  на строки после каждой точки
+                            string answerTextFinal = string.Join(".\r\n", sentences); // все обьеденяем разделяя точкой 
+
+                            foreach (var value in line) // поиск по точкам, для того чтобы при выводе сообщений это не выглядело как сплощной текст 
+                            {
+                                if (NewLine && value == ".")
+                                {
+                                    answerText += "\r\n";
+                                }
+
+                                answerText += value + "\t";
+
+                                if (value == ".")
+                                {
+                                    NewLine = true;
+                                }
+                                else
+                                {
+                                    NewLine = false;
+                                }
+                            }
+
+                            System.IO.File.AppendAllText(savedFile, answerTextFinal + "\r\n\r\n"); // записываем все в файл 
+                        }
+                    }
+                }
+
+                else
+                {
+                    await botClient.SendTextMessageAsync(chatId, "Данного заведения не найдено."); // добавляем исколючение если нет такого заведения 
                 }
             }
 
-            catch (Exception ex)
+            catch (Exception ex) // обрабатываем исключения 
             {
                 await botClient.SendTextMessageAsync(chatId, $"Ошибка: {ex.Message}");
             }
         }
-        if (message.Text == "Кафе") // ПроВерка на Кафе
+        if (message.Text == "Ресторан") // ПроВерка на Ресторан , работает так же как и проверка на Кафе
         {
             try
             {
-                var answer = request.Execute();
-                var values = answer.Values;
+                var answer = request.Execute(); // делаем запрос к гугл таблице
+                var values = answer.Values;// получаем значения из гугл таблицы
 
                 if (values != null && values.Count > 0)
                 {
-                    System.IO.File.WriteAllText(savedFile, string.Empty); // Очистить файл перед записью
+                    System.IO.File.WriteAllText(savedFile, string.Empty); // очищаем файл перед записью
 
-                    foreach (var line in values)
+                    foreach (var line in values) // перебираем все значения, полученные из гугл таблицы
                     {
-                        if (line.Contains("Тип заведения: Кафе."))
+                        if (line.Contains("Тип заведения: Ресторан.")) // проверяем содержит ли данную информацию
                         {
-                            bool NewLine = true;
-                            string answerText = string.Join("\t", line);
-                            string[] sentences = answerText.Split('.'); // Разбиваем текст на строки после каждой точки
-                            string answerTextFinal = string.Join(".\r\n", sentences);
-                            foreach (var value in line) // поиск по точкам 
+
+                            bool NewLine = true; // создаем переменную для отступов 
+                            string answerText = string.Join("\t", line); // создаем строки с разделением
+                            string[] sentences = answerText.Split('.'); // разбиваем  на строки после каждой точки
+                            string answerTextFinal = string.Join(".\r\n", sentences); // все обьеденяем разделяя точкой 
+
+                            foreach (var value in line) // поиск по точкам, для того чтобы при выводе сообщений это не выглядело как сплощной текст 
                             {
                                 if (NewLine && value == ".")
                                 {
@@ -138,67 +197,19 @@ partial class SendingMessages
                                     NewLine = false;
                                 }
                             }
-                            System.IO.File.AppendAllText(savedFile, answerTextFinal + "\r\n\r\n");
+
+                            System.IO.File.AppendAllText(savedFile, answerTextFinal + "\r\n\r\n"); // записываем все в файл 
                         }
                     }
                 }
+
                 else
                 {
-                    await botClient.SendTextMessageAsync(chatId, "Данного заведения не найдено.");
+                    await botClient.SendTextMessageAsync(chatId, "Данного заведения не найдено."); // добавляем исколючение если нет такого заведения 
                 }
             }
-            catch (Exception ex)
-            {
-                await botClient.SendTextMessageAsync(chatId, $"Ошибка: {ex.Message}");
-            }
-        }
-        if (message.Text == "Ресторан") // ПроВерка на Ресторан
-        {
-            try
-            {
-                var answer = request.Execute();
-                var values = answer.Values;
 
-                if (values != null && values.Count > 0)
-                {
-                    System.IO.File.WriteAllText(savedFile, string.Empty); // Очистить файл перед записью
-
-                    foreach (var line in values)
-                    {
-                        if (line.Contains("Тип заведения: Ресторан."))
-                        {
-                            bool NewLine = true;
-                            string answerText = string.Join("\t", line);
-                            string[] sentences = answerText.Split('.'); // Разбиваем текст на строки после каждой точки
-                            string answerTextFinal = string.Join(".\r\n", sentences);
-                            foreach (var value in line) // поиск по точкам 
-                            {
-                                if (NewLine && value == ".")
-                                {
-                                    answerText += "\r\n";
-                                }
-
-                                answerText += value + "\t";
-
-                                if (value == ".")
-                                {
-                                    NewLine = true;
-                                }
-                                else
-                                {
-                                    NewLine = false;
-                                }
-                            }
-                            System.IO.File.AppendAllText(savedFile, answerTextFinal + "\r\n\r\n");
-                        }
-                    }
-                }
-                else
-                {
-                    await botClient.SendTextMessageAsync(chatId, "Данного заведения не найдено.");
-                }
-            }
-            catch (Exception ex)
+            catch (Exception ex) // обрабатываем исключения 
             {
                 await botClient.SendTextMessageAsync(chatId, $"Ошибка: {ex.Message}");
             }
@@ -210,32 +221,32 @@ partial class SendingMessages
         {
             try
             {
-                if (System.IO.File.Exists(savedFile))
+                if (System.IO.File.Exists(savedFile)) // проверяем есть ли файл, в который мы записывали информацию после выбора типа заведений
                 {
-                    string savedData = System.IO.File.ReadAllText(savedFile);
-                    var records = savedData.Split(new string[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                    string savedData = System.IO.File.ReadAllText(savedFile); // читаем то, что содержится в файле 
+                    var records = savedData.Split(new string[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries); // разбиваем записи и сохраняем 
 
-                    List<string> filteredRecords = new List<string>();
-                    bool adding = false;
+                    List<string> filteredRecords = new List<string>(); // создаем список для дальнейшей работы с отфильтрованными записями 
+                    bool adding = false; // добавляем переменную для отследивания процесса добавления записей 
 
                     foreach (var record in records)
                     {
-                        if (record.Contains("Кухня: Быстрое питание."))
+                        if (record.Contains("Кухня: Быстрое питание.")) // проверяем содержится ли данная информация 
                         {
                             adding = true;
 
-                            filteredRecords.Add(record);
+                            filteredRecords.Add(record); // добавляем в отпильтрованную запись 
                         }
                     }
-                    string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords);
-                    System.IO.File.WriteAllText(savedFile, filteredRecordsFinal);
+                    string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords); // все обьединяем и разделяем 
+                    System.IO.File.WriteAllText(savedFile, filteredRecordsFinal); // записываем все в файл 
                 }
                 else
                 {
-                    await botClient.SendTextMessageAsync(chatId, "Данные для фильтрации отсутствуют.");
+                    await botClient.SendTextMessageAsync(chatId, "Данная информация отсутствует."); // если отсутствует информация 
                 }
             }
-            catch (Exception ex)
+            catch (Exception ex) // обработка исключений
             {
                 await botClient.SendTextMessageAsync(chatId, $"Ошибка: {ex.Message}");// Обработка исключения
             }
@@ -244,31 +255,32 @@ partial class SendingMessages
         {
             try
             {
-                if (System.IO.File.Exists(savedFile))
+                if (System.IO.File.Exists(savedFile)) // проверяем есть ли файл, в который мы записывали информацию после выбора типа заведений
                 {
-                    string savedData = System.IO.File.ReadAllText(savedFile);
-                    var records = savedData.Split(new string[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                    string savedData = System.IO.File.ReadAllText(savedFile); // читаем то, что содержится в файле 
+                    var records = savedData.Split(new string[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries); // разбиваем записи и сохраняем 
 
-                    List<string> filteredRecords = new List<string>();
-                    bool adding = false;
+                    List<string> filteredRecords = new List<string>(); // создаем список для дальнейшей работы с отфильтрованными записями 
+                    bool adding = false; // добавляем переменную для отследивания процесса добавления записей 
 
                     foreach (var record in records)
                     {
-                        if (record.Contains("Кухня: Восточная."))
+                        if (record.Contains("Кухня: Восточная.")) // проверяем содержится ли данная информация 
                         {
                             adding = true;
-                            filteredRecords.Add(record);
+
+                            filteredRecords.Add(record); // добавляем в отпильтрованную запись 
                         }
                     }
-                    string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords);
-                    System.IO.File.WriteAllText(savedFile, filteredRecordsFinal);
+                    string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords); // все обьединяем и разделяем 
+                    System.IO.File.WriteAllText(savedFile, filteredRecordsFinal); // записываем все в файл 
                 }
                 else
                 {
-                    await botClient.SendTextMessageAsync(chatId, "Данные для фильтрации отсутствуют.");
+                    await botClient.SendTextMessageAsync(chatId, "Данная информация отсутствует."); // если отсутствует информация 
                 }
             }
-            catch (Exception ex)
+            catch (Exception ex) // обработка исключений
             {
                 await botClient.SendTextMessageAsync(chatId, $"Ошибка: {ex.Message}");// Обработка исключения
             }
@@ -277,64 +289,66 @@ partial class SendingMessages
         {
             try
             {
-                if (System.IO.File.Exists(savedFile))
+                if (System.IO.File.Exists(savedFile)) // проверяем есть ли файл, в который мы записывали информацию после выбора типа заведений
                 {
-                    string savedData = System.IO.File.ReadAllText(savedFile);
-                    var records = savedData.Split(new string[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                    string savedData = System.IO.File.ReadAllText(savedFile); // читаем то, что содержится в файле 
+                    var records = savedData.Split(new string[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries); // разбиваем записи и сохраняем 
 
-                    List<string> filteredRecords = new List<string>();
-                    bool adding = false;
+                    List<string> filteredRecords = new List<string>(); // создаем список для дальнейшей работы с отфильтрованными записями 
+                    bool adding = false; // добавляем переменную для отследивания процесса добавления записей 
 
                     foreach (var record in records)
                     {
-                        if (record.Contains("Кухня: Итальянская."))
+                        if (record.Contains("Кухня: Итальянская.")) // проверяем содержится ли данная информация 
                         {
                             adding = true;
-                            filteredRecords.Add(record);
+
+                            filteredRecords.Add(record); // добавляем в отпильтрованную запись 
                         }
                     }
-                    string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords);
-                    System.IO.File.WriteAllText(savedFile, filteredRecordsFinal);
+                    string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords); // все обьединяем и разделяем 
+                    System.IO.File.WriteAllText(savedFile, filteredRecordsFinal); // записываем все в файл 
                 }
                 else
                 {
-                    await botClient.SendTextMessageAsync(chatId, "Данные для фильтрации отсутствуют.");
+                    await botClient.SendTextMessageAsync(chatId, "Данная информация отсутствует."); // если отсутствует информация 
                 }
             }
-            catch (Exception ex)
+            catch (Exception ex) // обработка исключений
             {
-                await botClient.SendTextMessageAsync(chatId, $"Ошибка: {ex.Message}"); // Обработка исключения
+                await botClient.SendTextMessageAsync(chatId, $"Ошибка: {ex.Message}");// Обработка исключения
             }
         }
         else if (message.Text == "Азиатская") // ПроВерка на Азиатская
         {
             try
             {
-                if (System.IO.File.Exists(savedFile))
+                if (System.IO.File.Exists(savedFile)) // проверяем есть ли файл, в который мы записывали информацию после выбора типа заведений
                 {
-                    string savedData = System.IO.File.ReadAllText(savedFile);
-                    var records = savedData.Split(new string[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                    string savedData = System.IO.File.ReadAllText(savedFile); // читаем то, что содержится в файле 
+                    var records = savedData.Split(new string[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries); // разбиваем записи и сохраняем 
 
-                    List<string> filteredRecords = new List<string>();
-                    bool adding = false;
+                    List<string> filteredRecords = new List<string>(); // создаем список для дальнейшей работы с отфильтрованными записями 
+                    bool adding = false; // добавляем переменную для отследивания процесса добавления записей 
 
                     foreach (var record in records)
                     {
-                        if (record.Contains("Кухня: Азиатская."))
+                        if (record.Contains("Кухня: Азиатская.")) // проверяем содержится ли данная информация 
                         {
                             adding = true;
-                            filteredRecords.Add(record);
+
+                            filteredRecords.Add(record); // добавляем в отпильтрованную запись 
                         }
                     }
-                    string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords);
-                    System.IO.File.WriteAllText(savedFile, filteredRecordsFinal);
+                    string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords); // все обьединяем и разделяем 
+                    System.IO.File.WriteAllText(savedFile, filteredRecordsFinal); // записываем все в файл 
                 }
                 else
                 {
-                    await botClient.SendTextMessageAsync(chatId, "Данные для фильтрации отсутствуют.");
+                    await botClient.SendTextMessageAsync(chatId, "Данная информация отсутствует."); // если отсутствует информация 
                 }
             }
-            catch (Exception ex)
+            catch (Exception ex) // обработка исключений
             {
                 await botClient.SendTextMessageAsync(chatId, $"Ошибка: {ex.Message}");// Обработка исключения
             }
@@ -343,31 +357,32 @@ partial class SendingMessages
         {
             try
             {
-                if (System.IO.File.Exists(savedFile))
+                if (System.IO.File.Exists(savedFile)) // проверяем есть ли файл, в который мы записывали информацию после выбора типа заведений
                 {
-                    string savedData = System.IO.File.ReadAllText(savedFile);
-                    var records = savedData.Split(new string[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                    string savedData = System.IO.File.ReadAllText(savedFile); // читаем то, что содержится в файле 
+                    var records = savedData.Split(new string[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries); // разбиваем записи и сохраняем 
 
-                    List<string> filteredRecords = new List<string>();
-                    bool adding = false;
+                    List<string> filteredRecords = new List<string>(); // создаем список для дальнейшей работы с отфильтрованными записями 
+                    bool adding = false; // добавляем переменную для отследивания процесса добавления записей 
 
                     foreach (var record in records)
                     {
-                        if (record.Contains("Кухня: Русская."))
+                        if (record.Contains("Кухня: Русская.")) // проверяем содержится ли данная информация 
                         {
                             adding = true;
-                            filteredRecords.Add(record);
+
+                            filteredRecords.Add(record); // добавляем в отпильтрованную запись 
                         }
                     }
-                    string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords);
-                    System.IO.File.WriteAllText(savedFile, filteredRecordsFinal);
+                    string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords); // все обьединяем и разделяем 
+                    System.IO.File.WriteAllText(savedFile, filteredRecordsFinal); // записываем все в файл 
                 }
                 else
                 {
-                    await botClient.SendTextMessageAsync(chatId, "Данные для фильтрации отсутствуют.");
+                    await botClient.SendTextMessageAsync(chatId, "Данная информация отсутствует."); // если отсутствует информация 
                 }
             }
-            catch (Exception ex)
+            catch (Exception ex) // обработка исключений
             {
                 await botClient.SendTextMessageAsync(chatId, $"Ошибка: {ex.Message}");// Обработка исключения
             }
@@ -376,64 +391,66 @@ partial class SendingMessages
         {
             try
             {
-                if (System.IO.File.Exists(savedFile))
+                if (System.IO.File.Exists(savedFile)) // проверяем есть ли файл, в который мы записывали информацию после выбора типа заведений
                 {
-                    string savedData = System.IO.File.ReadAllText(savedFile);
-                    var records = savedData.Split(new string[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                    string savedData = System.IO.File.ReadAllText(savedFile); // читаем то, что содержится в файле 
+                    var records = savedData.Split(new string[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries); // разбиваем записи и сохраняем 
 
-                    List<string> filteredRecords = new List<string>();
-                    bool adding = false;
+                    List<string> filteredRecords = new List<string>(); // создаем список для дальнейшей работы с отфильтрованными записями 
+                    bool adding = false; // добавляем переменную для отследивания процесса добавления записей 
 
                     foreach (var record in records)
                     {
-                        if (record.Contains("Кухня: Европейская."))
+                        if (record.Contains("Кухня: Европейская.")) // проверяем содержится ли данная информация 
                         {
                             adding = true;
-                            filteredRecords.Add(record);
+
+                            filteredRecords.Add(record); // добавляем в отпильтрованную запись 
                         }
                     }
-                    string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords);
-                    System.IO.File.WriteAllText(savedFile, filteredRecordsFinal);
+                    string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords); // все обьединяем и разделяем 
+                    System.IO.File.WriteAllText(savedFile, filteredRecordsFinal); // записываем все в файл 
                 }
                 else
                 {
-                    await botClient.SendTextMessageAsync(chatId, "Данные для фильтрации отсутствуют.");
+                    await botClient.SendTextMessageAsync(chatId, "Данная информация отсутствует."); // если отсутствует информация 
                 }
             }
-            catch (Exception ex)
+            catch (Exception ex) // обработка исключений
             {
-                await botClient.SendTextMessageAsync(chatId, $"Ошибка: {ex.Message}"); // Обработка исключения
+                await botClient.SendTextMessageAsync(chatId, $"Ошибка: {ex.Message}");// Обработка исключения
             }
         }
         else if (message.Text == "Грузинская") // ПроВерка на Грузинская
         {
             try
             {
-                if (System.IO.File.Exists(savedFile))
+                if (System.IO.File.Exists(savedFile)) // проверяем есть ли файл, в который мы записывали информацию после выбора типа заведений
                 {
-                    string savedData = System.IO.File.ReadAllText(savedFile);
-                    var records = savedData.Split(new string[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                    string savedData = System.IO.File.ReadAllText(savedFile); // читаем то, что содержится в файле 
+                    var records = savedData.Split(new string[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries); // разбиваем записи и сохраняем 
 
-                    List<string> filteredRecords = new List<string>();
-                    bool adding = false;
+                    List<string> filteredRecords = new List<string>(); // создаем список для дальнейшей работы с отфильтрованными записями 
+                    bool adding = false; // добавляем переменную для отследивания процесса добавления записей 
 
                     foreach (var record in records)
                     {
-                        if (record.Contains("Кухня: Грузинская."))
+                        if (record.Contains("Кухня: Грузинская.")) // проверяем содержится ли данная информация 
                         {
                             adding = true;
-                            filteredRecords.Add(record);
+
+                            filteredRecords.Add(record); // добавляем в отпильтрованную запись 
                         }
                     }
-                    string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords);
-                    System.IO.File.WriteAllText(savedFile, filteredRecordsFinal);
+                    string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords); // все обьединяем и разделяем 
+                    System.IO.File.WriteAllText(savedFile, filteredRecordsFinal); // записываем все в файл 
                 }
                 else
                 {
-                    await botClient.SendTextMessageAsync(chatId, "Данные для фильтрации отсутствуют.");
+                    await botClient.SendTextMessageAsync(chatId, "Данная информация отсутствует."); // если отсутствует информация 
                 }
             }
-            catch (Exception ex)
+            catch (Exception ex) // обработка исключений
             {
                 await botClient.SendTextMessageAsync(chatId, $"Ошибка: {ex.Message}");// Обработка исключения
             }
@@ -445,28 +462,32 @@ partial class SendingMessages
         {
             try
             {
-                if (System.IO.File.Exists(savedFile))
+                if (System.IO.File.Exists(savedFile)) // проверяем есть ли файл, в который мы записывали информацию после выбора типа заведений
                 {
-                    string savedData = System.IO.File.ReadAllText(savedFile);
-                    var records = savedData.Split(new string[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                    string savedData = System.IO.File.ReadAllText(savedFile); // читаем то, что содержится в файле 
+                    var records = savedData.Split(new string[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries); // разбиваем записи и сохраняем 
 
-                    List<string> filteredRecords = new List<string>();
-                    bool adding = false;
+                    List<string> filteredRecords = new List<string>(); // создаем список для дальнейшей работы с отфильтрованными записями 
+                    bool adding = false; // добавляем переменную для отследивания процесса добавления записей 
 
                     foreach (var record in records)
                     {
-                        if (record.Contains("Район: Свердловский."))
+                        if (record.Contains("Район: Свердловский.")) // проверяем содержится ли данная информация 
                         {
-
                             adding = true;
-                            filteredRecords.Add(record);
+
+                            filteredRecords.Add(record); // добавляем в отпильтрованную запись 
                         }
                     }
-                    string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords);
-                    System.IO.File.WriteAllText(savedFile, filteredRecordsFinal);
+                    string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords); // все обьединяем и разделяем 
+                    System.IO.File.WriteAllText(savedFile, filteredRecordsFinal); // записываем все в файл 
+                }
+                else
+                {
+                    await botClient.SendTextMessageAsync(chatId, "Данная информация отсутствует."); // если отсутствует информация 
                 }
             }
-            catch (Exception ex)
+            catch (Exception ex) // обработка исключений
             {
                 await botClient.SendTextMessageAsync(chatId, $"Ошибка: {ex.Message}");// Обработка исключения
             }
@@ -475,31 +496,32 @@ partial class SendingMessages
         {
             try
             {
-                if (System.IO.File.Exists(savedFile))
+                if (System.IO.File.Exists(savedFile)) // проверяем есть ли файл, в который мы записывали информацию после выбора типа заведений
                 {
-                    string savedData = System.IO.File.ReadAllText(savedFile);
-                    var records = savedData.Split(new string[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                    string savedData = System.IO.File.ReadAllText(savedFile); // читаем то, что содержится в файле 
+                    var records = savedData.Split(new string[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries); // разбиваем записи и сохраняем 
 
-                    List<string> filteredRecords = new List<string>();
-                    bool adding = false;
+                    List<string> filteredRecords = new List<string>(); // создаем список для дальнейшей работы с отфильтрованными записями 
+                    bool adding = false; // добавляем переменную для отследивания процесса добавления записей 
 
                     foreach (var record in records)
                     {
-                        if (record.Contains("Район: Ленинский."))
+                        if (record.Contains("Район: Ленинский.")) // проверяем содержится ли данная информация 
                         {
                             adding = true;
-                            filteredRecords.Add(record);
+
+                            filteredRecords.Add(record); // добавляем в отпильтрованную запись 
                         }
                     }
-                    string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords);
-                    System.IO.File.WriteAllText(savedFile, filteredRecordsFinal);
+                    string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords); // все обьединяем и разделяем 
+                    System.IO.File.WriteAllText(savedFile, filteredRecordsFinal); // записываем все в файл 
                 }
                 else
                 {
-                    await botClient.SendTextMessageAsync(chatId, "Данные для фильтрации отсутствуют.");
+                    await botClient.SendTextMessageAsync(chatId, "Данная информация отсутствует."); // если отсутствует информация 
                 }
             }
-            catch (Exception ex)
+            catch (Exception ex) // обработка исключений
             {
                 await botClient.SendTextMessageAsync(chatId, $"Ошибка: {ex.Message}");// Обработка исключения
             }
@@ -508,32 +530,32 @@ partial class SendingMessages
         {
             try
             {
-                if (System.IO.File.Exists(savedFile))
+                if (System.IO.File.Exists(savedFile)) // проверяем есть ли файл, в который мы записывали информацию после выбора типа заведений
                 {
-                    string savedData = System.IO.File.ReadAllText(savedFile);
-                    var records = savedData.Split(new string[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                    string savedData = System.IO.File.ReadAllText(savedFile); // читаем то, что содержится в файле 
+                    var records = savedData.Split(new string[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries); // разбиваем записи и сохраняем 
 
-                    List<string> filteredRecords = new List<string>();
-                    bool adding = false;
+                    List<string> filteredRecords = new List<string>(); // создаем список для дальнейшей работы с отфильтрованными записями 
+                    bool adding = false; // добавляем переменную для отследивания процесса добавления записей 
 
                     foreach (var record in records)
                     {
-                        if (record.Contains("Район: Мотовилихинский."))
+                        if (record.Contains("Район: Мотовилихинский.")) // проверяем содержится ли данная информация 
                         {
-
                             adding = true;
-                            filteredRecords.Add(record);
+
+                            filteredRecords.Add(record); // добавляем в отпильтрованную запись 
                         }
                     }
-                    string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords);
-                    System.IO.File.WriteAllText(savedFile, filteredRecordsFinal);
+                    string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords); // все обьединяем и разделяем 
+                    System.IO.File.WriteAllText(savedFile, filteredRecordsFinal); // записываем все в файл 
                 }
                 else
                 {
-                    await botClient.SendTextMessageAsync(chatId, "Данные для фильтрации отсутствуют.");
+                    await botClient.SendTextMessageAsync(chatId, "Данная информация отсутствует."); // если отсутствует информация 
                 }
             }
-            catch (Exception ex)
+            catch (Exception ex) // обработка исключений
             {
                 await botClient.SendTextMessageAsync(chatId, $"Ошибка: {ex.Message}");// Обработка исключения
             }
@@ -542,97 +564,100 @@ partial class SendingMessages
         {
             try
             {
-                if (System.IO.File.Exists(savedFile))
+                if (System.IO.File.Exists(savedFile)) // проверяем есть ли файл, в который мы записывали информацию после выбора типа заведений
                 {
-                    string savedData = System.IO.File.ReadAllText(savedFile);
-                    var records = savedData.Split(new string[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                    string savedData = System.IO.File.ReadAllText(savedFile); // читаем то, что содержится в файле 
+                    var records = savedData.Split(new string[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries); // разбиваем записи и сохраняем 
 
-                    List<string> filteredRecords = new List<string>();
-                    bool adding = false;
+                    List<string> filteredRecords = new List<string>(); // создаем список для дальнейшей работы с отфильтрованными записями 
+                    bool adding = false; // добавляем переменную для отследивания процесса добавления записей 
 
                     foreach (var record in records)
                     {
-                        if (record.Contains("Район: Индустриальный."))
+                        if (record.Contains("Район: Индустриальный.")) // проверяем содержится ли данная информация 
                         {
                             adding = true;
-                            filteredRecords.Add(record);
+
+                            filteredRecords.Add(record); // добавляем в отпильтрованную запись 
                         }
                     }
-                    string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords);
-                    System.IO.File.WriteAllText(savedFile, filteredRecordsFinal);
+                    string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords); // все обьединяем и разделяем 
+                    System.IO.File.WriteAllText(savedFile, filteredRecordsFinal); // записываем все в файл 
                 }
                 else
                 {
-                    await botClient.SendTextMessageAsync(chatId, "Данные для фильтрации отсутствуют.");
+                    await botClient.SendTextMessageAsync(chatId, "Данная информация отсутствует."); // если отсутствует информация 
                 }
             }
-            catch (Exception ex)
+            catch (Exception ex) // обработка исключений
             {
-                await botClient.SendTextMessageAsync(chatId, $"Ошибка: {ex.Message}"); // Обработка исключения
+                await botClient.SendTextMessageAsync(chatId, $"Ошибка: {ex.Message}");// Обработка исключения
             }
         }
         else if (message.Text == "Орджоникидзевский") // ПроВерка на Орджоникидзевский
         {
             try
             {
-                if (System.IO.File.Exists(savedFile))
+                if (System.IO.File.Exists(savedFile)) // проверяем есть ли файл, в который мы записывали информацию после выбора типа заведений
                 {
-                    string savedData = System.IO.File.ReadAllText(savedFile);
-                    var records = savedData.Split(new string[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                    string savedData = System.IO.File.ReadAllText(savedFile); // читаем то, что содержится в файле 
+                    var records = savedData.Split(new string[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries); // разбиваем записи и сохраняем 
 
-                    List<string> filteredRecords = new List<string>();
-                    bool adding = false;
+                    List<string> filteredRecords = new List<string>(); // создаем список для дальнейшей работы с отфильтрованными записями 
+                    bool adding = false; // добавляем переменную для отследивания процесса добавления записей 
 
                     foreach (var record in records)
                     {
-                        if (record.Contains("Район: Орджоникидзевский."))
+                        if (record.Contains("Район: Орджоникидзевский.")) // проверяем содержится ли данная информация 
                         {
                             adding = true;
-                            filteredRecords.Add(record);
+
+                            filteredRecords.Add(record); // добавляем в отпильтрованную запись 
                         }
                     }
-                    string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords);
-                    System.IO.File.WriteAllText(savedFile, filteredRecordsFinal);
+                    string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords); // все обьединяем и разделяем 
+                    System.IO.File.WriteAllText(savedFile, filteredRecordsFinal); // записываем все в файл 
                 }
                 else
                 {
-                    await botClient.SendTextMessageAsync(chatId, "Данные для фильтрации отсутствуют.");
+                    await botClient.SendTextMessageAsync(chatId, "Данная информация отсутствует."); // если отсутствует информация 
                 }
             }
-            catch (Exception ex)
+            catch (Exception ex) // обработка исключений
             {
-                await botClient.SendTextMessageAsync(chatId, $"Ошибка: {ex.Message}"); // Обработка исключения
+                await botClient.SendTextMessageAsync(chatId, $"Ошибка: {ex.Message}");// Обработка исключения
             }
         }
         else if (message.Text == "Дзержинский") // ПроВерка на Дзержинский
         {
             try
             {
-                if (System.IO.File.Exists(savedFile))
+                if (System.IO.File.Exists(savedFile)) // проверяем есть ли файл, в который мы записывали информацию после выбора типа заведений
                 {
-                    string savedData = System.IO.File.ReadAllText(savedFile);
-                    var records = savedData.Split(new string[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                    string savedData = System.IO.File.ReadAllText(savedFile); // читаем то, что содержится в файле 
+                    var records = savedData.Split(new string[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries); // разбиваем записи и сохраняем 
 
-                    List<string> filteredRecords = new List<string>();
-                    bool adding = false;
+                    List<string> filteredRecords = new List<string>(); // создаем список для дальнейшей работы с отфильтрованными записями 
+                    bool adding = false; // добавляем переменную для отследивания процесса добавления записей 
 
                     foreach (var record in records)
                     {
-                        if (record.Contains("Район: Дзержинский."))
+                        if (record.Contains("Район: Дзержинский.")) // проверяем содержится ли данная информация 
                         {
                             adding = true;
-                            filteredRecords.Add(record);
+
+                            filteredRecords.Add(record); // добавляем в отпильтрованную запись 
                         }
                     }
-                    string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords);
-                    System.IO.File.WriteAllText(savedFile, filteredRecordsFinal);
+                    string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords); // все обьединяем и разделяем 
+                    System.IO.File.WriteAllText(savedFile, filteredRecordsFinal); // записываем все в файл 
                 }
                 else
                 {
-                    await botClient.SendTextMessageAsync(chatId, "Данные для фильтрации отсутствуют.");
+                    await botClient.SendTextMessageAsync(chatId, "Данная информация отсутствует."); // если отсутствует информация 
                 }
             }
-            catch (Exception ex)
+            catch (Exception ex) // обработка исключений
             {
                 await botClient.SendTextMessageAsync(chatId, $"Ошибка: {ex.Message}");// Обработка исключения
             }
@@ -641,31 +666,32 @@ partial class SendingMessages
         {
             try
             {
-                if (System.IO.File.Exists(savedFile))
+                if (System.IO.File.Exists(savedFile)) // проверяем есть ли файл, в который мы записывали информацию после выбора типа заведений
                 {
-                    string savedData = System.IO.File.ReadAllText(savedFile);
-                    var records = savedData.Split(new string[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                    string savedData = System.IO.File.ReadAllText(savedFile); // читаем то, что содержится в файле 
+                    var records = savedData.Split(new string[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries); // разбиваем записи и сохраняем 
 
-                    List<string> filteredRecords = new List<string>();
-                    bool adding = false;
+                    List<string> filteredRecords = new List<string>(); // создаем список для дальнейшей работы с отфильтрованными записями 
+                    bool adding = false; // добавляем переменную для отследивания процесса добавления записей 
 
                     foreach (var record in records)
                     {
-                        if (record.Contains("Район: Кировский."))
+                        if (record.Contains("Район: Кировский.")) // проверяем содержится ли данная информация 
                         {
                             adding = true;
-                            filteredRecords.Add(record);
+
+                            filteredRecords.Add(record); // добавляем в отпильтрованную запись 
                         }
                     }
-                    string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords);
-                    System.IO.File.WriteAllText(savedFile, filteredRecordsFinal);
+                    string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords); // все обьединяем и разделяем 
+                    System.IO.File.WriteAllText(savedFile, filteredRecordsFinal); // записываем все в файл 
                 }
                 else
                 {
-                    await botClient.SendTextMessageAsync(chatId, "Данные для фильтрации отсутствуют.");
+                    await botClient.SendTextMessageAsync(chatId, "Данная информация отсутствует."); // если отсутствует информация 
                 }
             }
-            catch (Exception ex)
+            catch (Exception ex) // обработка исключений
             {
                 await botClient.SendTextMessageAsync(chatId, $"Ошибка: {ex.Message}");// Обработка исключения
             }
@@ -677,179 +703,168 @@ partial class SendingMessages
         {
             try
             {
-                if (System.IO.File.Exists(savedFile))
+                if (System.IO.File.Exists(savedFile))// проверяем есть ли файл, в который мы записывали информацию после выбора типа заведений
                 {
-                    string savedData = System.IO.File.ReadAllText(savedFile);
-                    var records = savedData.Split(new string[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                    string savedData = System.IO.File.ReadAllText(savedFile);// читаем то, что содержится в файле 
+                    var records = savedData.Split(new string[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries); // разбиваем записи и сохраняем 
 
-                    List<string> filteredRecords = new List<string>();
-                    bool adding = false;
-                    bool existence = false;
+                    List<string> filteredRecords = new List<string>();// создаем список для дальнейшей работы с отфильтрованными записями 
+                    bool adding = false;// добавляем переменную для отследивания процесса добавления записей 
+                    bool existence = false; // добавляем переменную чтобы в дальнейшем выдать информацию, если данной ценовой категории нет при заданных фильтрах
                     foreach (var record in records)
                     {
-                        if (record.Contains("Средний чек: До 500 руб."))
+                        if (record.Contains("Средний чек: До 500 руб."))// проверяем содержится ли данная информация 
                         {
                             existence = true;
                             adding = true;
-                            filteredRecords.Add(record);
+                            filteredRecords.Add(record);// добавляем в отпильтрованную запись 
                         }
                     }
 
-                    if (!existence)
+                    if (!existence) // выдаем сообщение если при данных фильтрах ничего нет 
                     {
                         await botClient.SendTextMessageAsync(chatId, "При ваших фильтрах отсутствует заведение в городе Перми с данным средним чеком.");
                     }
 
-                    else
+                    else  // если при данных фильтрах что-то есть 
                     {
-                        string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords);
-                        System.IO.File.WriteAllText(savedFile, filteredRecordsFinal);
-                        // это вывод, того, что нашел бот в таблице
-                        await botClient.SendTextMessageAsync(chatId, filteredRecordsFinal);
+                        string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords);// все обьединяем и разделяем
+                        System.IO.File.WriteAllText(savedFile, filteredRecordsFinal);// записываем все в файл 
+
+                        await botClient.SendTextMessageAsync(chatId, filteredRecordsFinal); // выводим информацию о заведениях
                     }
                 }
-                else
-                {
-                    await botClient.SendTextMessageAsync(chatId, "Данные для фильтрации отсутствуют.");
-                }
+                
             }
-            catch (Exception ex)
+            catch (Exception ex)// Обработка исключения
             {
-                await botClient.SendTextMessageAsync(chatId, $"Ошибка: {ex.Message}");// Обработка исключения
+                await botClient.SendTextMessageAsync(chatId, $"Ошибка: {ex.Message}");
             }
         }
         else if (message.Text == "500-1000 руб.") // ПроВерка на 500-1000 руб.
         {
             try
             {
-                if (System.IO.File.Exists(savedFile))
+                if (System.IO.File.Exists(savedFile))// проверяем есть ли файл, в который мы записывали информацию после выбора типа заведений
                 {
-                    string savedData = System.IO.File.ReadAllText(savedFile);
-                    var records = savedData.Split(new string[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                    string savedData = System.IO.File.ReadAllText(savedFile);// читаем то, что содержится в файле 
+                    var records = savedData.Split(new string[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries); // разбиваем записи и сохраняем 
 
-                    List<string> filteredRecords = new List<string>();
-                    bool adding = false;
-                    bool existence = false;
+                    List<string> filteredRecords = new List<string>();// создаем список для дальнейшей работы с отфильтрованными записями 
+                    bool adding = false;// добавляем переменную для отследивания процесса добавления записей 
+                    bool existence = false; // добавляем переменную чтобы в дальнейшем выдать информацию, если данной ценовой категории нет при заданных фильтрах
                     foreach (var record in records)
                     {
-                        if (record.Contains("Средний чек: 500-1000 руб."))
+                        if (record.Contains("Средний чек: 500-1000 руб."))// проверяем содержится ли данная информация 
                         {
-                            adding = true;
                             existence = true;
-                            filteredRecords.Add(record);
+                            adding = true;
+                            filteredRecords.Add(record);// добавляем в отпильтрованную запись 
                         }
                     }
 
-                    if (!existence)
+                    if (!existence) // выдаем сообщение если при данных фильтрах ничего нет 
                     {
                         await botClient.SendTextMessageAsync(chatId, "При ваших фильтрах отсутствует заведение в городе Перми с данным средним чеком.");
                     }
 
-                    else
+                    else  // если при данных фильтрах что-то есть 
                     {
-                        string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords);
-                        System.IO.File.WriteAllText(savedFile, filteredRecordsFinal);
-                        // это вывод, того, что нашел бот в таблице
-                        await botClient.SendTextMessageAsync(chatId, filteredRecordsFinal);
+                        string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords);// все обьединяем и разделяем
+                        System.IO.File.WriteAllText(savedFile, filteredRecordsFinal);// записываем все в файл 
+
+                        await botClient.SendTextMessageAsync(chatId, filteredRecordsFinal); // выводим информацию о заведениях
                     }
                 }
-                else
-                {
-                    await botClient.SendTextMessageAsync(chatId, "Данные для фильтрации отсутствуют.");
-                }
+
             }
-            catch (Exception ex)
+            catch (Exception ex)// Обработка исключения
             {
-                await botClient.SendTextMessageAsync(chatId, $"Ошибка: {ex.Message}");// Обработка исключения
+                await botClient.SendTextMessageAsync(chatId, $"Ошибка: {ex.Message}");
             }
         }
         else if (message.Text == "1000-1500 руб.") // ПроВерка на 1000-1500 руб.
         {
             try
             {
-                if (System.IO.File.Exists(savedFile))
+                if (System.IO.File.Exists(savedFile))// проверяем есть ли файл, в который мы записывали информацию после выбора типа заведений
                 {
-                    string savedData = System.IO.File.ReadAllText(savedFile);
-                    var records = savedData.Split(new string[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                    string savedData = System.IO.File.ReadAllText(savedFile);// читаем то, что содержится в файле 
+                    var records = savedData.Split(new string[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries); // разбиваем записи и сохраняем 
 
-                    List<string> filteredRecords = new List<string>();
-                    bool adding = false;
-                    bool existence = false;
+                    List<string> filteredRecords = new List<string>();// создаем список для дальнейшей работы с отфильтрованными записями 
+                    bool adding = false;// добавляем переменную для отследивания процесса добавления записей 
+                    bool existence = false; // добавляем переменную чтобы в дальнейшем выдать информацию, если данной ценовой категории нет при заданных фильтрах
                     foreach (var record in records)
                     {
-                        if (record.Contains("Средний чек: 1000-1500 руб."))
+                        if (record.Contains("Средний чек: 1000-1500 руб."))// проверяем содержится ли данная информация 
                         {
-                            adding = true;
                             existence = true;
-                            filteredRecords.Add(record);
+                            adding = true;
+                            filteredRecords.Add(record);// добавляем в отпильтрованную запись 
                         }
                     }
-                    if (!existence)
+
+                    if (!existence) // выдаем сообщение если при данных фильтрах ничего нет 
                     {
                         await botClient.SendTextMessageAsync(chatId, "При ваших фильтрах отсутствует заведение в городе Перми с данным средним чеком.");
                     }
 
-                    else
+                    else  // если при данных фильтрах что-то есть 
                     {
-                        string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords);
-                        System.IO.File.WriteAllText(savedFile, filteredRecordsFinal);
-                        // это вывод, того, что нашел бот в таблице
-                        await botClient.SendTextMessageAsync(chatId, filteredRecordsFinal);
+                        string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords);// все обьединяем и разделяем
+                        System.IO.File.WriteAllText(savedFile, filteredRecordsFinal);// записываем все в файл 
+
+                        await botClient.SendTextMessageAsync(chatId, filteredRecordsFinal); // выводим информацию о заведениях
                     }
                 }
-                else
-                {
-                    await botClient.SendTextMessageAsync(chatId, "Данные для фильтрации отсутствуют.");
-                }
+
             }
-            catch (Exception ex)
+            catch (Exception ex)// Обработка исключения
             {
-                await botClient.SendTextMessageAsync(chatId, $"Ошибка: {ex.Message}");// Обработка исключения
+                await botClient.SendTextMessageAsync(chatId, $"Ошибка: {ex.Message}");
             }
         }
         else if (message.Text == "От 1500 руб.") // ПроВерка на от 1500 руб.
         {
             try
             {
-                if (System.IO.File.Exists(savedFile))
+                if (System.IO.File.Exists(savedFile))// проверяем есть ли файл, в который мы записывали информацию после выбора типа заведений
                 {
-                    string savedData = System.IO.File.ReadAllText(savedFile);
-                    var records = savedData.Split(new string[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                    string savedData = System.IO.File.ReadAllText(savedFile);// читаем то, что содержится в файле 
+                    var records = savedData.Split(new string[] { "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries); // разбиваем записи и сохраняем 
 
-                    List<string> filteredRecords = new List<string>();
-                    bool adding = false;
-                    bool existence = false;
+                    List<string> filteredRecords = new List<string>();// создаем список для дальнейшей работы с отфильтрованными записями 
+                    bool adding = false;// добавляем переменную для отследивания процесса добавления записей 
+                    bool existence = false; // добавляем переменную чтобы в дальнейшем выдать информацию, если данной ценовой категории нет при заданных фильтрах
                     foreach (var record in records)
                     {
-                        if (record.Contains("Средний чек: От 1500 руб."))
+                        if (record.Contains("Средний чек: От 1500 руб."))// проверяем содержится ли данная информация 
                         {
-                            adding = true;
                             existence = true;
-                            filteredRecords.Add(record);
+                            adding = true;
+                            filteredRecords.Add(record);// добавляем в отпильтрованную запись 
                         }
                     }
 
-                    if (!existence)
+                    if (!existence) // выдаем сообщение если при данных фильтрах ничего нет 
                     {
                         await botClient.SendTextMessageAsync(chatId, "При ваших фильтрах отсутствует заведение в городе Перми с данным средним чеком.");
                     }
 
-                    else
+                    else  // если при данных фильтрах что-то есть 
                     {
-                        string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords);
-                        System.IO.File.WriteAllText(savedFile, filteredRecordsFinal);
-                        // это вывод, того, что нашел бот в таблице
-                        await botClient.SendTextMessageAsync(chatId, filteredRecordsFinal);
+                        string filteredRecordsFinal = string.Join("\r\n\r\n", filteredRecords);// все обьединяем и разделяем
+                        System.IO.File.WriteAllText(savedFile, filteredRecordsFinal);// записываем все в файл 
+
+                        await botClient.SendTextMessageAsync(chatId, filteredRecordsFinal); // выводим информацию о заведениях
                     }
                 }
-                else
-                {
-                    await botClient.SendTextMessageAsync(chatId, "Данные для фильтрации отсутствуют.");
-                }
+
             }
-            catch (Exception ex)
+            catch (Exception ex)// Обработка исключения
             {
-                await botClient.SendTextMessageAsync(chatId, $"Ошибка: {ex.Message}");// Обработка исключения
+                await botClient.SendTextMessageAsync(chatId, $"Ошибка: {ex.Message}");
             }
         }
 
@@ -857,31 +872,31 @@ partial class SendingMessages
         {
             InlineKeyboardMarkup inlineKeyboard = new(new[]
             {
-             new[] { InlineKeyboardButton.WithUrl("Обратная связь", "https://forms.gle/RN9s4z8i1ohjYxHeA") },
+             new[] { InlineKeyboardButton.WithUrl("Обратная связь", "https://forms.gle/RN9s4z8i1ohjYxHeA") }, // создание кнопки для перессылки на гугл-форму если пользователь нажимает нажимает на "поддержка"
             });
-            await botClient.SendTextMessageAsync(chatId, "Нажмите, чтобы заполнить форму:", replyMarkup: inlineKeyboard);
+            await botClient.SendTextMessageAsync(chatId, "Нажмите, чтобы заполнить форму:", replyMarkup: inlineKeyboard);// отправка сообщений пользователю
         }
 
-        List<string> districts = new List<string> { "Мотовилихинский", "Свердловский", "Индустриальный", "Ленинский", "Орджоникидзевский", "Дзержинский", "Кировский" };
+        List<string> districts = new List<string> { "Мотовилихинский", "Свердловский", "Индустриальный", "Ленинский", "Орджоникидзевский", "Дзержинский", "Кировский" };// списки для дальнейшей работы
         List<string> restaurants = new List<string> { "Ресторан", "Кафе", "Бар/Паб" };
         List<string> prices = new List<string> { "До 500 руб.", "500-1000 руб.", "1000-1500 руб.", "От 1500 руб." };
         List<string> kitchens = new List<string> { "Восточная", "Европейская", "Быстрое питание", "Грузинская", "Азиатская", "Итальянская", "Русская" };
 
-        if (message.Text == "/start" || message.Text == "⟲Начать заново⟲")
+        if (message.Text == "/start" || message.Text == "⟲Начать заново⟲") // если пользователем отправлены данные сообщения/сообщение
         {
 
-            var replyMarkup = new ReplyKeyboardMarkup(new[]
+            var replyMarkup = new ReplyKeyboardMarkup(new[] // создаем кнопки 
            {
              new[] { new KeyboardButton("Ресторан"), new KeyboardButton("Кафе") },
              new[] { new KeyboardButton("Бар/Паб")},
              new[] { new KeyboardButton("✔Поддержка✔") },
              new[] { new KeyboardButton("⟲Начать заново⟲") },
          }, resizeKeyboard: true);           
-            await botClient.SendTextMessageAsync(chatId, "В какое заведение вы хотели бы пойти:", replyMarkup: replyMarkup);
+            await botClient.SendTextMessageAsync(chatId, "В какое заведение вы хотели бы пойти:", replyMarkup: replyMarkup);// отправка сообщений пользователю
         }
-        else if (message.Text == "Ресторан")
+        else if (message.Text == "Ресторан")// если пользователем отправлены данные сообщения/сообщение
         {
-            var replyMarkup = new ReplyKeyboardMarkup(new[]
+            var replyMarkup = new ReplyKeyboardMarkup(new[]// создаем кнопки
             {new[] { new KeyboardButton("Русская"), new KeyboardButton("Восточная") },
              new[] { new KeyboardButton("Европейская"), new KeyboardButton("Быстрое питание") },
              new[] { new KeyboardButton("Азиатская"),new KeyboardButton("Итальянская")},
@@ -890,12 +905,12 @@ partial class SendingMessages
              new[] { new KeyboardButton("⟲Начать заново⟲") },
          }, resizeKeyboard: true);
 
-            await botClient.SendTextMessageAsync(chatId, $"Вы выбрали тип кухни: {message.Text}. Теперь выберите тип кухни:", replyMarkup: replyMarkup);
+            await botClient.SendTextMessageAsync(chatId, $"Вы выбрали тип кухни: {message.Text}. Теперь выберите тип кухни:", replyMarkup: replyMarkup);// отправка сообщений пользователю
         }
 
-        else if (message.Text == "Бар/Паб")
+        else if (message.Text == "Бар/Паб")// если пользователем отправлены данные сообщения/сообщение
         {
-            var replyMarkup = new ReplyKeyboardMarkup(new[]
+            var replyMarkup = new ReplyKeyboardMarkup(new[]// создаем кнопки
            {
              new[] { new KeyboardButton("Мотовилихинский"), new KeyboardButton("Свердловский") },
              new[] { new KeyboardButton("Индустриальный"), new KeyboardButton("Ленинский") },
@@ -905,12 +920,12 @@ partial class SendingMessages
              new[] { new KeyboardButton("⟲Начать заново⟲") },
          }, resizeKeyboard: true);
 
-            await botClient.SendTextMessageAsync(chatId, $"Вы выбрали тип заведения : {message.Text}. Теперь выберите район:", replyMarkup: replyMarkup);
+            await botClient.SendTextMessageAsync(chatId, $"Вы выбрали тип заведения : {message.Text}. Теперь выберите район:", replyMarkup: replyMarkup);// отправка сообщений пользователю
         }
 
-        else if (message.Text == "Кафе")
+        else if (message.Text == "Кафе")// если пользователем отправлены данные сообщения/сообщение
         {
-            var replyMarkup = new ReplyKeyboardMarkup(new[]
+            var replyMarkup = new ReplyKeyboardMarkup(new[]// создаем кнопки
             {
              new[] { new KeyboardButton("Мотовилихинский"), new KeyboardButton("Свердловский") },
              new[] { new KeyboardButton("Индустриальный"), new KeyboardButton("Ленинский") },
@@ -920,12 +935,12 @@ partial class SendingMessages
              new[] { new KeyboardButton("⟲Начать заново⟲") },
          }, resizeKeyboard: true);
 
-            await botClient.SendTextMessageAsync(chatId, $"Вы выбрали тип заведения : {message.Text}. Теперь выберите район:", replyMarkup: replyMarkup);
+            await botClient.SendTextMessageAsync(chatId, $"Вы выбрали тип заведения : {message.Text}. Теперь выберите район:", replyMarkup: replyMarkup);// отправка сообщений пользователю
         }
 
-        else if (kitchens.Contains(message.Text))
+        else if (kitchens.Contains(message.Text))// если пользователем отправлены данные сообщения/сообщение
         {
-            var replyMarkup = new ReplyKeyboardMarkup(new[]
+            var replyMarkup = new ReplyKeyboardMarkup(new[]// создаем кнопки
             {
              new[] { new KeyboardButton("Мотовилихинский"), new KeyboardButton("Свердловский") },
              new[] { new KeyboardButton("Индустриальный"), new KeyboardButton("Ленинский") },
@@ -935,11 +950,11 @@ partial class SendingMessages
              new[] { new KeyboardButton("⟲Начать заново⟲") },
          }, resizeKeyboard: true);
 
-            await botClient.SendTextMessageAsync(chatId, $"Вы выбрали тип заведения : {message.Text}. Теперь выберите район:", replyMarkup: replyMarkup);
+            await botClient.SendTextMessageAsync(chatId, $"Вы выбрали тип заведения : {message.Text}. Теперь выберите район:", replyMarkup: replyMarkup);// отправка сообщений пользователю
         }
-        else if (districts.Contains(message.Text))
+        else if (districts.Contains(message.Text))// если пользователем отправлены данные сообщения/сообщение
         {
-            var replyMarkup = new ReplyKeyboardMarkup(new[]
+            var replyMarkup = new ReplyKeyboardMarkup(new[]// создаем кнопки
             {
               new[] { new KeyboardButton("До 500 руб."), new KeyboardButton("500-1000 руб.") },
              new[] { new KeyboardButton("1000-1500 руб."), new KeyboardButton("От 1500 руб.") },
@@ -947,7 +962,7 @@ partial class SendingMessages
              new[] { new KeyboardButton("⟲Начать заново⟲") },
          }, resizeKeyboard: true);
 
-            await botClient.SendTextMessageAsync(chatId, $"Вы выбрали район: {message.Text}. Теперь выберите ценовую категорию:", replyMarkup: replyMarkup);
+            await botClient.SendTextMessageAsync(chatId, $"Вы выбрали район: {message.Text}. Теперь выберите ценовую категорию:", replyMarkup: replyMarkup);// отправка сообщений пользователю
         }
     }
 }
